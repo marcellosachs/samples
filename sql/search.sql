@@ -24,6 +24,24 @@ Continue producing new rows like this until a step occurs where the only rows pr
 
 */
 
+CREATE FUNCTION match_substring(t text) RETURNS text AS $$
+  BEGIN
+    RETURN substring(t from '%#"to#"%' for '#');
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION match_position(t text) RETURNS integer AS $$
+  BEGIN
+    RETURN strpos(t, match_substring(t));
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION length_match(t text) RETURNS integer AS $$
+  BEGIN
+    RETURN length(match_substring(t));
+  END;
+$$ LANGUAGE plpgsql;
+
 
 WITH RECURSIVE rec AS (
     SELECT
@@ -31,12 +49,10 @@ WITH RECURSIVE rec AS (
       null       as result,
       notes.body as next
 
-    FROM notes
+    FROM ts notes
     WHERE notes.body SIMILAR TO '%to%'
 
   UNION
-    -- Note : 'rec' refers to only the results of the last step, not to results of all previous steps
-    -- http://www.postgresql.org/docs/9.5/static/queries-with.html#docContent
 
     SELECT
       rec.id as id,
@@ -44,24 +60,19 @@ WITH RECURSIVE rec AS (
       substring(
         rec.next
         from
-          strpos(
-            rec.next, substring(rec.next from '%#"to#"%' for '#')
-          ) - 100
-        for 200 + length(substring(rec.next from '%#"to#"%' for '#'))
+          match_position(rec.next) - 100
+        for 200 + length_match(rec.next)
       ) as result,
 
       -- everything in rec.next following what was extracted for 'result' above
       substring(
         rec.next
         from
-          strpos(
-            rec.next, substring(rec.next from '%#"to#"%' for '#')
-          )
-        + 100 + length(substring(rec.next from '%#"to#"%' for '#'))
+          match_position(rec.next) + 100 + length_match(rec.next)
         for length(rec.next)
       ) as next
 
     FROM rec
 )
 
-SELECT rec.id, rec.result FROM rec WHERE rec.result IS NOT NULL
+SELECT rec.result FROM rec WHERE rec.result IS NOT NULL ORDER BY rec.result;

@@ -13,9 +13,13 @@ Strategy :
   3. attach results from 2 to info about the relevant teacher
   teacher_with_max_activities_completed_per_school = join result from 1 to result from 2 on activities_completed, school
 
-
-
 */
+
+CREATE FUNCTION get_domain(t character varying(255)) RETURNS character varying(255) AS $$
+  BEGIN
+    RETURN lower(substring(t from (position('@' in t)+1)));
+  END;
+$$ LANGUAGE plpgsql;
 
 WITH total_activities_completed_per_teacher as (SELECT
     best_domains.domain as domain,
@@ -29,19 +33,16 @@ WITH total_activities_completed_per_teacher as (SELECT
     JOIN
 
       ( SELECT
-        lower(substring(t.email from (position('@' in t.email)+1))) as domain
+        get_domain(t.email) as domain
         FROM users t
         WHERE t.role = 'teacher'
-        AND lower(substring(t.email from (position('@' in t.email)+1))) != 'gmail.com'
-        AND lower(substring(t.email from (position('@' in t.email)+1))) != 'yahoo.com'
-        AND lower(substring(t.email from (position('@' in t.email)+1))) != 'hotmail.com'
-        AND lower(substring(t.email from (position('@' in t.email)+1))) != 'aol.com'
         AND t.email IS NOT NULL
-        GROUP BY lower(substring(t.email from (position('@' in t.email)+1)))
+        AND get_domain(t.email) NOT IN ('gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com')
+        GROUP BY get_domain(t.email)
         HAVING COUNT(DISTINCT t.id) > 2
       ) best_domains
 
-    ON best_domains.domain = lower(substring(t.email from (position('@' in t.email)+1)))
+    ON best_domains.domain = get_domain(t.email)
 
     WHERE activity_sessions.completed_at IS NOT NULL
     GROUP BY best_domains.domain, t.email, t.name
@@ -73,4 +74,4 @@ JOIN
 
 ON  total_activities_completed_per_teacher.domain               = max_activities_completed_by_teacher_in_each_school.domain
 AND total_activities_completed_per_teacher.activities_completed = max_activities_completed_by_teacher_in_each_school.activities_completed
-
+;
