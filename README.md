@@ -6,7 +6,7 @@ Clever Integration for Quill.org : (Ruby On Rails)
 * https://github.com/marcellosachs/Empirical-Core/tree/marcello/app/services/clever_integration
 
 Analytics Query for Quill.org : (SQL)
-* https://github.com/marcellosachs/samples/sql/max_by.sql
+* https://github.com/marcellosachs/samples/blob/master/sql/max_by.sql
 
 Search Query using Recursive With : (SQL)
-* https://github.com/marcellosachs/samples/sql/search.sql
+* https://github.com/marcellosachs/samples/blob/master/sql/search.sql
