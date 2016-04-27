@@ -64,4 +64,4 @@ WITH RECURSIVE rec AS (
     FROM rec
 )
 
-SELECT rec.result FROM rec WHERE rec.result IS NOT NULL
+SELECT rec.id, rec.result FROM rec WHERE rec.result IS NOT NULL
