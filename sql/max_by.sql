@@ -1,21 +1,23 @@
 /*
-Objective : for each school, retrieve the teacher whose classroom has completed the greatest number of activities.
 
-Strategy :
+OBJECTIVE :
 
-  1. get number of completed activities for each teacher :
-  total_activities_completed_per_teacher = group completed activities by teacher, making sure to select teacher's school
-  note : school is determined using the domain of a teacher's email
+For each school, retrieve the teacher whose classroom has completed the greatest number of activities.
 
-  2. get maximum number of activities completed by any individual teacher within each school
-  max_activities_completed_by_teacher_in_each_school = group results from step 1 by school, selecting the max completed activities
 
-  3. attach results from 2 to info about the relevant teacher
-  teacher_with_max_activities_completed_per_school = join result from 1 to result from 2 on activities_completed, school
+STRATEGY :
+
+1. Get number of completed activities for each teacher.
+Note : school is determined using the domain of a teacher's email.
+
+2. Get maximum number of activities completed by any individual teacher within each school.
+Do this by grouping results from step 1 by school, selecting the max completed activities.
+
+3. Attach results from 2 to info about the relevant teacher.
 
 */
 
-CREATE FUNCTION get_domain(t character varying(255)) RETURNS character varying(255) AS $$
+CREATE OR REPLACE FUNCTION get_domain(t character varying(255)) RETURNS character varying(255) AS $$
   BEGIN
     RETURN lower(substring(t from (position('@' in t)+1)));
   END;
@@ -44,9 +46,9 @@ WITH total_activities_completed_per_teacher as (SELECT
 
     ON best_domains.domain = get_domain(t.email)
 
-    WHERE activity_sessions.completed_at IS NOT NULL
+    WHERE activity_sessions.state = 'finished'
     GROUP BY best_domains.domain, t.email, t.name
-    ORDER BY count(activity_sessions.completed_at) DESC
+    ORDER BY COUNT(DISTINCT activity_sessions.id) DESC
 )
 
 
@@ -68,7 +70,6 @@ JOIN
       MAX(total_activities_completed_per_teacher.activities_completed) as activities_completed
     FROM
       total_activities_completed_per_teacher
-
     GROUP BY total_activities_completed_per_teacher.domain
   ) max_activities_completed_by_teacher_in_each_school
 
