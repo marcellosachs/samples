@@ -6,12 +6,13 @@ Replacing substrings with React Components, recursively : (ES6, React)
 
 # Ruby on Rails
 
-[Clever](https://clever.com/) Integration for [Quill.org](https://quill.org) :
+[Clever](https://clever.com/) Integration for [Quill.org](quill.org) :
 * https://github.com/marcellosachs/Empirical-Core/tree/marcello/app/services/clever_integration
+* https://github.com/marcellosachs/Empirical-Core/tree/marcello/spec/services/clever_integration
 
 # SQL
 
-Analytics Query for [Quill.org](https://quill.org) : (Postgresql, Aggregation)
+Analytics Query for [Quill.org](quill.org) : (Postgresql, Aggregation)
 * https://github.com/marcellosachs/samples/blob/master/sql/max_by.sql
 
 Search Query : (Postgresql, Recursive With)
